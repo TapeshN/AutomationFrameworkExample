@@ -1,6 +1,5 @@
-package StepDefinitions;
+package UITests.StepDefinitions;
 
-import PageObjects.GoogleHomePage;
 import io.cucumber.java.en.And;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -13,11 +12,9 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -38,7 +35,6 @@ public class googleStepDef {
 
     @When("automation inputs {string} into the search field")
     public void automation_inputs_into_the_search_field(String string) {
-        // Write code here that turns the phrase above into concrete actions
         WebElement searchBar = driver.findElement(By.xpath("//*[@id='APjFqb']"));
         searchBar.sendKeys(string);
         searchBar.sendKeys(Keys.RETURN);

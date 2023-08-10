@@ -1,16 +1,14 @@
 package UITests.StepDefinitions;
 
 import io.cucumber.java.en.And;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.time.Duration;
@@ -23,34 +21,56 @@ public class googleStepDef {
     private static final Logger logger = LogManager.getLogger(googleStepDef.class);
     WebDriver driver = null;
 
-    @Given("initialized browser lands on {string}")
+    String parentWindow;
+
+    @Given("I am on {string}")
     public void initialized_browser_lands_on(String url) {
         System.setProperty("webdriver.chrome.driver", "/Users/tapeshnagarwal/Documents/Projects/Spiral/drivers/chromedriver");
         driver = new ChromeDriver();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(5));
+        driver.manage().timeouts().implicitlyWait(Duration.ofMinutes(2));
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofMinutes(2));
         driver.navigate().to(url);
         logger.info("Current URL: " + driver.getCurrentUrl());
     }
 
-    @When("automation inputs {string} into the search field")
+    @When("I search for {string}")
     public void automation_inputs_into_the_search_field(String string) {
         WebElement searchBar = driver.findElement(By.xpath("//*[@id='APjFqb']"));
         searchBar.sendKeys(string);
         searchBar.sendKeys(Keys.RETURN);
+        parentWindow = driver.getWindowHandle();
         logger.info("Test");
     }
 
-    @Then("automation validates results are related to {string}")
+    @Then("I should see results related to {string}")
     public void automation_validates_results_are_related_to(String string) {
+
+
+//        Assert Title of Google Tab contains the inputted search value
         Assert.assertTrue(driver.getTitle().contains(string));
+
+//        create two lists to collect all results and one to be used later to present valid ones
         List<WebElement> resultLinks;
         List<String> validResultLinks = new ArrayList<>();
-        resultLinks = driver.findElements(By.xpath("//*[@id='rso']/div[@class='MjjYud']//a"));
+
+//        This is the xpath for all the result divs
+        String xpath = "//*[@id='rso']//div[@jscontroller='SC7lYd']//./a";
+        resultLinks = driver.findElements(By.xpath(xpath));
         for (WebElement link : resultLinks) {
-            if (link.getText().contains(string))
-                validResultLinks.add(link.getText());
+            String url = link.getAttribute("href").toString();
+            WebDriver newTab = driver.switchTo().newWindow(WindowType.TAB);
+            String newWindow = newTab.getWindowHandle();
+            newTab.navigate().to(url);
+            int occurrence = StringUtils.countMatches(newTab.getPageSource(),string);
+            if(occurrence >= 5) {
+                validResultLinks.add(url);
+            }
+            newTab.close();
+            driver.switchTo().window(parentWindow);
         }
+//            if (link.getText().contains(string))
+//                validResultLinks.add(link.getText());
+//        }
         logger.info("Valid Results related to " + string + "are as following: ");
         for (String result : validResultLinks) {
             logger.info(result);

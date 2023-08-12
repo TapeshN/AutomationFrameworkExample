@@ -80,7 +80,6 @@
             <version>${commoms.lang3.version}</version>
         </dependency>
     </dependencies>
-    </dependencies>
 
     <build>
         <plugins>
